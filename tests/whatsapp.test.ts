@@ -142,8 +142,8 @@ describe("GET /api/whatsapp/templates", () => {
     stubGraph(() => ({
       json: {
         data: [
-          { name: "member_update", language: "en_US", status: "APPROVED", category: "UTILITY", parameter_format: "POSITIONAL", components: [{ type: "HEADER", format: "TEXT", text: "BNI Trendz" }, body("Hi {{1}}, meeting on {{2}}."), { type: "FOOTER", text: "Thanks" }] },
-          { name: "welcome_named", language: "en", status: "APPROVED", category: "MARKETING", parameter_format: "NAMED", components: [body("Welcome {{first_name}}!")] },
+          { name: "member_update", language: "en_US", status: "APPROVED", category: "UTILITY", parameter_format: "POSITIONAL", components: [{ type: "HEADER", format: "TEXT", text: "BNI Trendz" }, { ...body("Hi {{1}}, meeting on {{2}}."), example: { body_text: [["Asha", "Thursday"]] } }, { type: "FOOTER", text: "Thanks" }] },
+          { name: "welcome_named", language: "en", status: "APPROVED", category: "MARKETING", parameter_format: "NAMED", components: [{ ...body("Welcome {{first_name}}!"), example: { body_text_named_params: [{ param_name: "first_name", example: "Ravi" }] } }] },
           { name: "otp_verification", language: "en_US", status: "APPROVED", category: "AUTHENTICATION", components: [body("*{{1}}* is your code.")] },
           { name: "poster", language: "en_US", status: "APPROVED", category: "MARKETING", components: [{ type: "HEADER", format: "IMAGE" }, body("Look!")] },
           { name: "draft", language: "en_US", status: "PENDING", category: "UTILITY", components: [body("Soon")] },
@@ -154,8 +154,8 @@ describe("GET /api/whatsapp/templates", () => {
     const data = await res.json();
     expect(data.configured).toBe(true);
     expect(data.templates).toEqual([
-      { name: "member_update", language: "en_US", category: "UTILITY", header: "BNI Trendz", body: "Hi {{1}}, meeting on {{2}}.", footer: "Thanks", variables: ["1", "2"], named: false },
-      { name: "welcome_named", language: "en", category: "MARKETING", body: "Welcome {{first_name}}!", variables: ["first_name"], named: true },
+      { name: "member_update", language: "en_US", category: "UTILITY", header: "BNI Trendz", body: "Hi {{1}}, meeting on {{2}}.", footer: "Thanks", variables: ["1", "2"], examples: ["Asha", "Thursday"], named: false },
+      { name: "welcome_named", language: "en", category: "MARKETING", body: "Welcome {{first_name}}!", variables: ["first_name"], examples: ["Ravi"], named: true },
     ]);
     expect(calls[0]!.url).toContain("https://graph.facebook.com/v24.0/WABA_ID/message_templates");
   });

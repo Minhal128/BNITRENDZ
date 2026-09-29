@@ -16,6 +16,8 @@ type SendResult = {
 };
 
 const firstValues = (t?: WhatsAppTemplate) => t?.variables.map((_, i) => (i === 0 ? "{name}" : "")) ?? [];
+// Open on the chapter's own template ("bni_…") when there is one, so selecting members + Send is enough.
+const preferredIndex = (list: WhatsAppTemplate[]) => Math.max(0, list.findIndex((t) => t.name.startsWith("bni_")));
 const btnWhatsApp =
   "inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700 focus-visible:ring-4 focus-visible:ring-emerald-500/30 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-60";
 
@@ -35,8 +37,10 @@ export function WhatsAppComposer({ recipients, onClose }: { recipients: Recipien
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.error ?? "Couldn't load WhatsApp templates.");
         if (!data.configured) throw new Error("WhatsApp isn't configured on the server yet.");
+        const index = preferredIndex(data.templates);
         setTemplates(data.templates);
-        setValues(firstValues(data.templates[0]));
+        setTemplateIndex(index);
+        setValues(firstValues(data.templates[index]));
         if (!data.templates.length) setMode("text");
       })
       .catch((error: Error) => setLoadError(error.message));
@@ -202,6 +206,7 @@ export function WhatsAppComposer({ recipients, onClose }: { recipients: Recipien
                     <input
                       id={`wa-var-${i}`}
                       value={values[i] ?? ""}
+                      placeholder={template!.examples[i] ? `e.g. ${template!.examples[i]}` : undefined}
                       maxLength={1000}
                       onChange={(e) => setValues((prev) => prev.map((p, j) => (j === i ? e.target.value : p)))}
                       className={inputCls}

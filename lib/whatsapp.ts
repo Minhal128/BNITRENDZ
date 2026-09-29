@@ -49,7 +49,13 @@ type RawTemplate = {
   status: string;
   category: string;
   parameter_format?: string;
-  components: { type: string; format?: string; text?: string; buttons?: { type: string; url?: string }[] }[];
+  components: {
+    type: string;
+    format?: string;
+    text?: string;
+    buttons?: { type: string; url?: string }[];
+    example?: { body_text?: string[][]; body_text_named_params?: { param_name: string; example: string }[] };
+  }[];
 };
 
 export type WhatsAppTemplate = {
@@ -60,6 +66,7 @@ export type WhatsAppTemplate = {
   body: string;
   footer?: string;
   variables: string[];
+  examples: string[]; // sample value per variable, from the template's review examples
   named: boolean;
 };
 
@@ -83,6 +90,12 @@ export async function listTemplates(): Promise<WhatsAppTemplate[]> {
       buttons.every((b) => ["QUICK_REPLY", "PHONE_NUMBER"].includes(b.type) || (b.type === "URL" && !hasVariable(b.url)));
     if (!sendable || !body?.text) return [];
     const variables = [...new Set([...body.text.matchAll(/\{\{\s*(\w+)\s*\}\}/g)].map((m) => m[1]!))];
+    const named = t.parameter_format === "NAMED";
+    const examples = variables.map((v, i) =>
+      named
+        ? (body.example?.body_text_named_params?.find((p) => p.param_name === v)?.example ?? "")
+        : (body.example?.body_text?.[0]?.[i] ?? ""),
+    );
     return [
       {
         name: t.name,
@@ -92,7 +105,8 @@ export async function listTemplates(): Promise<WhatsAppTemplate[]> {
         body: body.text,
         footer: part("FOOTER")?.text,
         variables,
-        named: t.parameter_format === "NAMED",
+        examples,
+        named,
       },
     ];
   });
