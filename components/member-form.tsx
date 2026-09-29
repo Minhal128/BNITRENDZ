@@ -19,8 +19,8 @@ const SECTIONS: { title: string; fields: Field[] }[] = [
     title: "Member Info",
     fields: [
       { name: "memberName", label: "Member Name", autoComplete: "name", placeholder: "e.g. Ayesha Khan" },
-      { name: "companyName", label: "Company Name", autoComplete: "organization", placeholder: "e.g. Trendz Interiors" },
-      { name: "phone", label: "Phone Number", type: "tel", autoComplete: "tel", placeholder: "+92 300 1234567" },
+      { name: "companyName", label: "Company Name", autoComplete: "organization", placeholder: "e.g. BNI Trendz" },
+      { name: "phone", label: "Phone Number", type: "tel", autoComplete: "tel", placeholder: "+91 9876543210" },
       { name: "address", label: "Address", autoComplete: "street-address", placeholder: "Street, area, city" },
     ],
   },

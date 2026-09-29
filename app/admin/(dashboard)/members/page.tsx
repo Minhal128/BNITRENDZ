@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight, Eye, Pencil, Plus, SearchX, UserPlus } from 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DeleteMemberButton, QrButton } from "@/components/member-actions";
+import { SelectMemberCheckbox, SelectPageCheckbox, SelectionBar, SelectionProvider } from "@/components/member-selection";
 import { MembersToolbar } from "@/components/members-toolbar";
 import { Avatar, btnPrimary, btnSecondary, card, iconBtn } from "@/components/ui";
 import { displayUrl, formatDate, websiteHref } from "@/lib/format";
@@ -90,18 +91,24 @@ export default async function MembersPage({ searchParams }: PageProps<"/admin/me
           </div>
         </div>
       ) : (
-        <>
+        // Keyed by the filter so a new search starts a fresh selection; it survives paging.
+        <SelectionProvider key={`${query.search}|${query.sort}|${query.limit}`} pageIds={members.map((m) => m.id)}>
+          <SelectionBar total={total} search={query.search} />
+
           <div className={`${card} hidden overflow-hidden xl:block`}>
             {/* Fixed layout sized for the xl content width (~944px, 7 columns from 1400px); long values truncate. */}
             <table className="w-full table-fixed text-left text-sm">
               <caption className="sr-only">Members, page {page} of {totalPages}</caption>
               <thead className="border-b border-neutral-200 bg-neutral-50 text-xs font-semibold tracking-wide text-neutral-500 uppercase">
                 <tr>
-                  <th scope="col" className="w-[26%] px-3 py-3 min-[1400px]:w-[19%]">Member</th>
-                  <th scope="col" className="w-[18%] px-3 py-3 min-[1400px]:w-[12%]">Company</th>
+                  <th scope="col" className="w-12 py-3 pr-1 pl-4">
+                    <SelectPageCheckbox />
+                  </th>
+                  <th scope="col" className="w-[24%] px-3 py-3 min-[1400px]:w-[18%]">Member</th>
+                  <th scope="col" className="w-[16%] px-3 py-3 min-[1400px]:w-[11%]">Company</th>
                   <th scope="col" className="w-36 px-3 py-3">Phone</th>
-                  <th scope="col" className="w-[22%] px-3 py-3 min-[1400px]:w-[16%]">Email</th>
-                  <th scope="col" className="hidden w-[12%] px-3 py-3 min-[1400px]:table-cell">Website</th>
+                  <th scope="col" className="w-[21%] px-3 py-3 min-[1400px]:w-[15%]">Email</th>
+                  <th scope="col" className="hidden w-[11%] px-3 py-3 min-[1400px]:table-cell">Website</th>
                   <th scope="col" className="hidden w-28 px-3 py-3 min-[1400px]:table-cell">Created</th>
                   <th scope="col" className="w-44 px-3 py-3 text-right">Actions</th>
                 </tr>
@@ -109,6 +116,9 @@ export default async function MembersPage({ searchParams }: PageProps<"/admin/me
               <tbody className="divide-y divide-neutral-100">
                 {members.map((member) => (
                   <tr key={member.id} className="transition-colors hover:bg-red-50/40">
+                    <td className="py-3 pr-1 pl-4">
+                      <SelectMemberCheckbox id={member.id} name={member.memberName} />
+                    </td>
                     <td className="px-3 py-3">
                       <Link
                         href={`/admin/members/${member.id}`}
@@ -151,6 +161,7 @@ export default async function MembersPage({ searchParams }: PageProps<"/admin/me
             {members.map((member) => (
               <li key={member.id} className={`${card} p-4`}>
                 <div className="flex items-center gap-3">
+                  <SelectMemberCheckbox id={member.id} name={member.memberName} />
                   <Avatar name={member.memberName} />
                   <div className="min-w-0">
                     <Link href={`/admin/members/${member.id}`} className="block truncate font-semibold hover:text-red-700">
@@ -175,7 +186,7 @@ export default async function MembersPage({ searchParams }: PageProps<"/admin/me
               </li>
             ))}
           </ul>
-        </>
+        </SelectionProvider>
       )}
 
       <nav aria-label="Pagination" className="flex flex-col items-center justify-between gap-3 sm:flex-row">

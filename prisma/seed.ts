@@ -7,8 +7,8 @@ import { memberSchema } from "../lib/validation";
 const SAMPLE_MEMBERS = [
   {
     memberName: "Ayesha Khan",
-    companyName: "Trendz Interiors",
-    phone: "+92 300 1234567",
+    companyName: "BNI Trendz",
+    phone: "+91 9876543210",
     address: "12 Clifton Block 5, Karachi",
     birthday: "1990-04-12",
     anniversary: "2016-11-20",

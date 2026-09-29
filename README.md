@@ -49,6 +49,9 @@ cp .env.example .env
 | `NEXTAUTH_URL`        | dev only    | `http://localhost:3000` locally. Not needed on Vercel.                                                             |
 | `NEXT_PUBLIC_APP_URL` | yes*        | Public base URL used in profile links and QR codes, e.g. `https://your-domain.com` (no trailing slash). *On Vercel it defaults to the project's production domain. |
 | `APP_TIMEZONE`        | no          | IANA timezone for the dashboard's "today" and "this month" counts and CRM dates, e.g. `Asia/Karachi`. Defaults to `UTC`. |
+| `WHATSAPP_ACCESS_TOKEN` | for WhatsApp | Permanent System User token for the WhatsApp Cloud API (`whatsapp_business_messaging` and `whatsapp_business_management` permissions). |
+| `WHATSAPP_PHONE_NUMBER_ID` | for WhatsApp | Phone number ID that messages are sent from (WhatsApp Manager → API setup).                                 |
+| `WHATSAPP_BUSINESS_ACCOUNT_ID` | for WhatsApp | WhatsApp Business Account ID, used to list your approved message templates.                             |
 | `ADMIN_NAME`          | no          | Display name of the admin created by the seed.                                                                    |
 | `ADMIN_EMAIL`         | for seeding | Email of the admin created by the seed.                                                                           |
 | `ADMIN_PASSWORD`      | for seeding | Password of that admin (at least 8 characters). Only its scrypt hash is stored.                                   |
@@ -110,6 +113,15 @@ There is no public sign-up for admins. The initial admin comes from the seed:
 
 To change the password, update `ADMIN_PASSWORD` and run the seed again. Passwords are hashed with **scrypt** (OWASP parameters, random salt) and never stored in plain text.
 
+## WhatsApp messaging
+
+On `/admin/members`, tick members one by one, or use the header checkbox to select the whole page. After that, **Select all N** covers every member matching the current search, across pages. Then click **Send WhatsApp**:
+
+- **Approved template.** Lists your approved templates live from WhatsApp. Fill the template variables, where `{name}` becomes each member's name. Templates are the only way to start a conversation with members who haven't messaged you recently.
+- **Custom message.** Free text, also supporting `{name}`. WhatsApp only delivers it to members who messaged your business number in the last 24 hours.
+
+Numbers without a country code are treated as Indian (+91). Members without a valid phone number are skipped. The results screen shows how many messages were sent, failed and skipped, with WhatsApp's reason for each failure. Templates with media headers, dynamic buttons or OTP codes aren't offered. Create new templates in WhatsApp Manager and they appear automatically.
+
 ## Quality checks
 
 ```bash
@@ -166,6 +178,8 @@ npm start
 | `GET /api/members`                      | admin        | List with `page`, `limit` (default 20, max 100), `search`, `sort` (`newest`, `oldest`, `name_asc`, `name_desc`) |
 | `GET/PATCH/DELETE /api/members/:id`     | admin        | Read, update and delete one member                        |
 | `GET /api/members/public/:publicToken`  | public       | Public profile fields only                                |
+| `GET /api/whatsapp/templates`           | admin        | Approved WhatsApp templates that can be sent              |
+| `POST /api/whatsapp/send`               | admin        | Send a template or text to `memberIds`, or to `all` members matching `search` |
 
 ## Security notes
 

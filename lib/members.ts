@@ -35,11 +35,16 @@ const ORDER_BY = {
   name_desc: { memberName: "desc" },
 } satisfies Record<ListQuery["sort"], Prisma.MemberOrderByWithRelationInput>;
 
-export async function listMembers({ page, limit, search, sort }: ListQuery) {
+/** Case-insensitive match on name, company, email or phone; shared by the list and bulk WhatsApp sends. */
+export function memberSearchWhere(search: string): Prisma.MemberWhereInput {
   const contains = { contains: search, mode: "insensitive" } as const;
-  const where: Prisma.MemberWhereInput = search
+  return search
     ? { OR: [{ memberName: contains }, { companyName: contains }, { email: contains }, { phone: contains }] }
     : {};
+}
+
+export async function listMembers({ page, limit, search, sort }: ListQuery) {
+  const where = memberSearchWhere(search);
   const [total, members] = await Promise.all([
     prisma.member.count({ where }),
     prisma.member.findMany({

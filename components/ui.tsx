@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { initials } from "@/lib/format";
 
 const btn =
@@ -28,12 +29,14 @@ export function Skeleton({ className = "" }: { className?: string }) {
 export function Brand({ onRed = false }: { onRed?: boolean }) {
   return (
     <span className="inline-flex items-center gap-2.5 text-lg font-extrabold tracking-tight">
-      <span
-        aria-hidden
-        className={`grid size-9 place-items-center rounded-xl text-base shadow-sm ${onRed ? "bg-white text-red-600" : "bg-red-600 text-white"}`}
-      >
-        B
-      </span>
+      <Image
+        src="/logo.jpeg"
+        alt=""
+        width={40}
+        height={40}
+        priority
+        className={`size-10 rounded-xl object-cover shadow-sm ${onRed ? "ring-2 ring-white/80" : ""}`}
+      />
       <span className={onRed ? "text-white" : "text-neutral-900"}>
         BNI<span className={onRed ? "text-red-100" : "text-red-600"}>TRENDZ</span>
       </span>

@@ -9,7 +9,7 @@ import { QrCard } from "./qr-card";
 import { btnDanger, btnPrimary, btnSecondary, iconBtn } from "./ui";
 
 /** Native <dialog>: focus trapping, Esc-to-close and the backdrop come from the browser. */
-function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+export function Modal({ title, onClose, children, wide = false }: { title: string; onClose: () => void; children: ReactNode; wide?: boolean }) {
   const titleId = useId();
   return (
     <dialog
@@ -19,7 +19,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
       onClose={onClose}
       onClick={(e) => e.target === e.currentTarget && e.currentTarget.close()}
       aria-labelledby={titleId}
-      className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-neutral-950/50 backdrop:backdrop-blur-sm"
+      className={`m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-y-auto rounded-2xl bg-white p-0 shadow-2xl backdrop:bg-neutral-950/50 backdrop:backdrop-blur-sm ${wide ? "max-w-xl" : "max-w-md"}`}
     >
       <div className="p-6">
         <div className="mb-5 flex items-start justify-between gap-4">
