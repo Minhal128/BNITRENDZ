@@ -49,7 +49,7 @@ export function WhatsAppComposer({ recipients, onClose }: { recipients: Recipien
   const template = templates?.[templateIndex];
   const canSend = mode === "text" ? text.trim().length > 0 : !!template && values.every((v) => v.trim());
   const preview = template?.body.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key: string) =>
-    (values[template.variables.indexOf(key)] || match).replaceAll("{name}", "Ayesha"),
+    (values[template.variables.indexOf(key)] || match).replaceAll("{name}", "[Member Name]"),
   );
 
   async function send() {
