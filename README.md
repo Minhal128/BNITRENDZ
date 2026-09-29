@@ -47,7 +47,7 @@ cp .env.example .env
 | `TEST_DATABASE_URL`   | for tests   | A **separate** database for `npm test`. It is wiped before every test.                                           |
 | `NEXTAUTH_SECRET`     | yes         | Secret used to sign and encrypt sessions. Generate one with `openssl rand -base64 32`.                            |
 | `NEXTAUTH_URL`        | dev only    | `http://localhost:3000` locally. Not needed on Vercel.                                                             |
-| `NEXT_PUBLIC_APP_URL` | yes         | Public base URL used in profile links and QR codes, e.g. `https://your-domain.com` (no trailing slash).           |
+| `NEXT_PUBLIC_APP_URL` | yes*        | Public base URL used in profile links and QR codes, e.g. `https://your-domain.com` (no trailing slash). *On Vercel it defaults to the project's production domain. |
 | `APP_TIMEZONE`        | no          | IANA timezone for the dashboard's "today" and "this month" counts and CRM dates, e.g. `Asia/Karachi`. Defaults to `UTC`. |
 | `ADMIN_NAME`          | no          | Display name of the admin created by the seed.                                                                    |
 | `ADMIN_EMAIL`         | for seeding | Email of the admin created by the seed.                                                                           |
@@ -139,8 +139,8 @@ npm start
    - `DATABASE_URL`: pooled connection string.
    - `DIRECT_URL`: direct connection string, used for migrations (Neon: `DATABASE_URL_UNPOOLED`).
    - `NEXTAUTH_SECRET`: a new random secret.
-   - `NEXT_PUBLIC_APP_URL`: your production URL, e.g. `https://bnitrendz.vercel.app`.
    - `APP_TIMEZONE`: e.g. `Asia/Karachi`.
+   - `NEXT_PUBLIC_APP_URL`: only when QR codes should use a domain other than the project's Vercel production domain, e.g. a custom domain. Redeploy after changing it.
 3. Deploy. `vercel.json` sets the build command to `prisma migrate deploy && next build`, so each deploy applies pending migrations before building.
 4. Create the production admin once, from a machine that can reach the database:
 

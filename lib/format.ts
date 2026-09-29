@@ -1,4 +1,8 @@
-export const APP_URL = (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(/\/+$/, "");
+// On Vercel, fall back to the project's production domain (a system variable inlined at build time).
+const vercelDomain = process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL;
+export const APP_URL = (
+  process.env.NEXT_PUBLIC_APP_URL || (vercelDomain ? `https://${vercelDomain}` : "http://localhost:3000")
+).replace(/\/+$/, "");
 
 /** The only thing a member QR code ever contains. */
 export const profileUrl = (publicToken: string) => `${APP_URL}/member/${publicToken}`;
