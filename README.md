@@ -152,7 +152,7 @@ npm start
    - `DIRECT_URL`: direct connection string, used for migrations (Neon: `DATABASE_URL_UNPOOLED`).
    - `NEXTAUTH_SECRET`: a new random secret.
    - `APP_TIMEZONE`: e.g. `Asia/Karachi`.
-   - `NEXT_PUBLIC_APP_URL`: only when QR codes should use a domain other than the project's Vercel production domain, e.g. a custom domain. Redeploy after changing it.
+   - `NEXT_PUBLIC_APP_URL`: the domain printed on QR codes, e.g. `https://bnitrendz.vercel.app`. It's optional and defaults to the project's production domain. Setting it keeps QR codes stable if the project moves to another Vercel account or domain. Redeploy after changing it.
 3. Deploy. `vercel.json` sets the build command to `prisma migrate deploy && next build`, so each deploy applies pending migrations before building.
 4. Create the production admin once, from a machine that can reach the database:
 
