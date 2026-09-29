@@ -38,6 +38,7 @@ export async function signInAdmin() {
 export const validMember = {
   memberName: "Jane Doe",
   companyName: "Acme Ltd",
+  businessCategory: "Interior Design",
   phone: "+92 300 1234567",
   address: "1 Main Street, Karachi",
   birthday: "1990-05-10",

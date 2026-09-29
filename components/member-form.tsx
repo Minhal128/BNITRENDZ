@@ -20,6 +20,7 @@ const SECTIONS: { title: string; fields: Field[] }[] = [
     fields: [
       { name: "memberName", label: "Member Name", autoComplete: "name", placeholder: "e.g. Ayesha Khan" },
       { name: "companyName", label: "Company Name", autoComplete: "organization", placeholder: "e.g. BNI Trendz" },
+      { name: "businessCategory", label: "Business Category", placeholder: "e.g. Interior Design" },
       { name: "phone", label: "Phone Number", type: "tel", autoComplete: "tel", placeholder: "+91 9876543210" },
       { name: "address", label: "Address", autoComplete: "street-address", placeholder: "Street, area, city" },
     ],

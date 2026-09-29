@@ -1,4 +1,4 @@
-import { Building2, Cake, Camera, CirclePlay, Globe, Heart, Mail, MapPin, Phone, Users } from "lucide-react";
+import { BriefcaseBusiness, Building2, Cake, Camera, CirclePlay, Globe, Heart, Mail, MapPin, Phone, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { InfoRow, type Info } from "@/components/info-row";
@@ -49,6 +49,11 @@ export default async function MemberProfilePage({ params }: Props) {
           {member.companyName && (
             <p className="mt-1.5 inline-flex items-center gap-1.5 text-neutral-600">
               <Building2 className="size-4 shrink-0" aria-hidden /> {member.companyName}
+            </p>
+          )}
+          {member.businessCategory && (
+            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-red-50 px-3 py-1 text-sm font-semibold text-red-700">
+              <BriefcaseBusiness className="size-4 shrink-0" aria-hidden /> {member.businessCategory}
             </p>
           )}
         </div>

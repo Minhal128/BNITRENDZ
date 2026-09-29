@@ -2,7 +2,7 @@
 
 A web app for managing a member network:
 
-- **Public registration** at `/member/register`. Anyone can sign up. The member instantly gets a personal profile link and a QR code they can copy, share or download.
+- **Public registration** at `/member/register`. Anyone can sign up with their name, company, business category, contact details, special dates and social links. The member instantly gets a personal profile link and a QR code they can copy, share or download.
 - **Public profiles** at `/member/[publicToken]`. Only the fields a member filled in are shown, with tap-to-call, email and social links.
 - **Admin CRM** at `/admin`. Signed-in admins get dashboard stats and full member CRUD, with database-backed search, sorting, pagination and QR codes.
 

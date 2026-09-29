@@ -139,7 +139,7 @@ describe("admin member CRUD", () => {
 });
 
 describe("admin search and pagination", () => {
-  it("searches name, company, email and phone in the database, case-insensitively", async () => {
+  it("searches name, company, category, email and phone in the database, case-insensitively", async () => {
     await signInAdmin();
     await prisma.member.createMany({
       data: [
@@ -147,6 +147,7 @@ describe("admin search and pagination", () => {
         { memberName: "Bob Jones", companyName: "Acme Widgets", publicToken: "s2" },
         { memberName: "Carol White", email: "carol@ACME.io", publicToken: "s3" },
         { memberName: "Dan Brown", phone: "+92 300 5550000", publicToken: "s4" },
+        { memberName: "Eve Stone", businessCategory: "Interior Design", publicToken: "s5" },
       ],
     });
     const names = async (search: string) =>
@@ -154,6 +155,7 @@ describe("admin search and pagination", () => {
     expect(await names("acme")).toEqual(["Bob Jones", "Carol White"]);
     expect(await names("ALICE")).toEqual(["Alice Smith"]);
     expect(await names("5550000")).toEqual(["Dan Brown"]);
+    expect(await names("interior")).toEqual(["Eve Stone"]);
     expect(await names("no match")).toEqual([]);
     expect((await list("?search=acme")).total).toBe(2);
   });

@@ -32,6 +32,7 @@ export default async function EditMemberPage({ params }: PageProps<"/admin/membe
           initialValues={{
             memberName: member.memberName,
             companyName: member.companyName ?? "",
+            businessCategory: member.businessCategory ?? "",
             phone: member.phone ?? "",
             address: member.address ?? "",
             birthday: toDateInput(member.birthday),

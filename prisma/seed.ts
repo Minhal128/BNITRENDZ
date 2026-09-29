@@ -8,6 +8,7 @@ const SAMPLE_MEMBERS = [
   {
     memberName: "Ayesha Khan",
     companyName: "BNI Trendz",
+    businessCategory: "Interior Design",
     phone: "+91 9876543210",
     address: "12 Clifton Block 5, Karachi",
     birthday: "1990-04-12",
@@ -21,6 +22,7 @@ const SAMPLE_MEMBERS = [
   {
     memberName: "Bilal Ahmed",
     companyName: "Ahmed & Co. Chartered Accountants",
+    businessCategory: "Chartered Accountant",
     phone: "+92 321 7654321",
     address: "45 Gulberg III, Lahore",
     birthday: "1985-09-03",
@@ -31,6 +33,7 @@ const SAMPLE_MEMBERS = [
   {
     memberName: "Sara Malik",
     companyName: "Malik Events",
+    businessCategory: "Event Management",
     phone: "+92 333 5550199",
     birthday: "1994-01-27",
     instagram: "@malikevents",

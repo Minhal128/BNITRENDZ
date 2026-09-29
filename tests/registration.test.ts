@@ -21,12 +21,13 @@ describe("public registration (POST /api/members)", () => {
     expect(member).not.toHaveProperty("createdAt");
   });
 
-  it("saves all 11 member fields to the database", async () => {
+  it("saves every member field to the database", async () => {
     const { member } = await (await register(validMember)).json();
     const row = await prisma.member.findUniqueOrThrow({ where: { publicToken: member.publicToken } });
     expect(row).toMatchObject({
       memberName: "Jane Doe",
       companyName: "Acme Ltd",
+      businessCategory: "Interior Design",
       phone: "+92 300 1234567",
       address: "1 Main Street, Karachi",
       website: "https://acme.example.com/",

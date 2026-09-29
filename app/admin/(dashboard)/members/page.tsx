@@ -81,7 +81,7 @@ export default async function MembersPage({ searchParams }: PageProps<"/admin/me
           </h2>
           <p className="mt-1 text-sm text-neutral-500">
             {query.search
-              ? "Try a different name, company, email or phone number."
+              ? "Try a different name, company, category, email or phone number."
               : total
                 ? "This page is past the end of the list."
                 : "Share the registration link or add the first member yourself."}
@@ -133,7 +133,12 @@ export default async function MembersPage({ searchParams }: PageProps<"/admin/me
                         className="flex items-center gap-3 rounded-lg font-semibold hover:text-red-700 focus-visible:ring-4 focus-visible:ring-red-500/25 focus-visible:outline-none"
                       >
                         <Avatar name={member.memberName} />
-                        <span className="truncate">{member.memberName}</span>
+                        <span className="min-w-0">
+                          <span className="block truncate">{member.memberName}</span>
+                          {member.businessCategory && (
+                            <span className="block truncate text-xs font-normal text-neutral-500">{member.businessCategory}</span>
+                          )}
+                        </span>
                       </Link>
                     </td>
                     <td className="truncate px-3 py-3 text-neutral-600">{member.companyName ?? dash}</td>
@@ -175,7 +180,9 @@ export default async function MembersPage({ searchParams }: PageProps<"/admin/me
                     <Link href={`/admin/members/${member.id}`} className="block truncate font-semibold hover:text-red-700">
                       {member.memberName}
                     </Link>
-                    <p className="truncate text-sm text-neutral-500">{member.companyName ?? "No company"}</p>
+                    <p className="truncate text-sm text-neutral-500">
+                      {[member.companyName, member.businessCategory].filter(Boolean).join(" · ") || "No company"}
+                    </p>
                   </div>
                 </div>
                 <dl className="mt-3 grid grid-cols-[5rem_1fr] gap-x-3 gap-y-1 text-sm">

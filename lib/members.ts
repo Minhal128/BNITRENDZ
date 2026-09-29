@@ -12,6 +12,7 @@ export const publicMemberSelect = {
   publicToken: true,
   memberName: true,
   companyName: true,
+  businessCategory: true,
   phone: true,
   address: true,
   birthday: true,
@@ -35,11 +36,19 @@ const ORDER_BY = {
   name_desc: { memberName: "desc" },
 } satisfies Record<ListQuery["sort"], Prisma.MemberOrderByWithRelationInput>;
 
-/** Case-insensitive match on name, company, email or phone; shared by the list and bulk WhatsApp sends. */
+/** Case-insensitive match on name, company, category, email or phone; shared by the list and bulk WhatsApp sends. */
 export function memberSearchWhere(search: string): Prisma.MemberWhereInput {
   const contains = { contains: search, mode: "insensitive" } as const;
   return search
-    ? { OR: [{ memberName: contains }, { companyName: contains }, { email: contains }, { phone: contains }] }
+    ? {
+        OR: [
+          { memberName: contains },
+          { companyName: contains },
+          { businessCategory: contains },
+          { email: contains },
+          { phone: contains },
+        ],
+      }
     : {};
 }
 

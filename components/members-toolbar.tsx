@@ -19,7 +19,7 @@ export function MembersToolbar({ search, sort, limit }: { search: string; sort: 
           type="search"
           defaultValue={search}
           maxLength={100}
-          placeholder="Search name, company, email or phone"
+          placeholder="Search name, company, category, email or phone"
           className={`${inputCls} pl-10`}
         />
       </div>

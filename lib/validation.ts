@@ -66,6 +66,7 @@ const social = text(200).transform((v, ctx) => {
 export const memberSchema = z.object({
   memberName: text(100).min(1, "Member name is required."),
   companyName: optionalText(120).nullish(),
+  businessCategory: optionalText(100).nullish(),
   phone: phone.nullish(),
   address: optionalText(300).nullish(),
   birthday: date.nullish(),

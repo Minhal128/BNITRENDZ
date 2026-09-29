@@ -1,4 +1,4 @@
-import { ArrowLeft, Building2, Cake, Camera, CirclePlay, Globe, Heart, Mail, MapPin, Pencil, Phone, UserRound, Users } from "lucide-react";
+import { ArrowLeft, BriefcaseBusiness, Building2, Cake, Camera, CirclePlay, Globe, Heart, Mail, MapPin, Pencil, Phone, UserRound, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -20,6 +20,7 @@ export default async function MemberDetailPage({ params }: PageProps<"/admin/mem
   const info: Info[] = [
     { icon: UserRound, label: "Member Name", value: member.memberName },
     { icon: Building2, label: "Company Name", value: member.companyName },
+    { icon: BriefcaseBusiness, label: "Business Category", value: member.businessCategory },
     { icon: Phone, label: "Phone Number", value: member.phone, href: member.phone ? `tel:${member.phone.replace(/[^\d+]/g, "")}` : undefined },
     { icon: Mail, label: "Email", value: member.email, href: member.email ? `mailto:${member.email}` : undefined },
     { icon: MapPin, label: "Address", value: member.address },
