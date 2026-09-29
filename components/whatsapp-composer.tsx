@@ -7,7 +7,7 @@ import type { WhatsAppTemplate } from "@/lib/whatsapp";
 import { Modal } from "./member-actions";
 import { Skeleton, btnSecondary, inputCls } from "./ui";
 
-type Recipients = { memberIds: string[]; all: boolean; search: string; count: number };
+type Recipients = { memberIds: string[]; all: boolean; search: string; count: number; name?: string };
 type SendResult = {
   sent: number;
   failed: number;
@@ -18,8 +18,48 @@ type SendResult = {
 const firstValues = (t?: WhatsAppTemplate) => t?.variables.map((_, i) => (i === 0 ? "{name}" : "")) ?? [];
 // Open on the chapter's own template ("bni_…") when there is one, so selecting members + Send is enough.
 const preferredIndex = (list: WhatsAppTemplate[]) => Math.max(0, list.findIndex((t) => t.name.startsWith("bni_")));
-const btnWhatsApp =
+export const btnWhatsApp =
   "inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-700 focus-visible:ring-4 focus-visible:ring-emerald-500/30 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-60";
+const iconBtnWhatsApp =
+  "inline-flex size-9 items-center justify-center rounded-lg text-emerald-600 transition-colors hover:bg-emerald-50 hover:text-emerald-700 focus-visible:ring-4 focus-visible:ring-emerald-500/25 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-40";
+
+/** One-click WhatsApp for a single member (row action, member page). */
+export function WhatsAppButton({
+  memberId,
+  memberName,
+  hasPhone,
+  withLabel = false,
+  className = "",
+}: {
+  memberId: string;
+  memberName: string;
+  hasPhone: boolean;
+  withLabel?: boolean;
+  className?: string;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        className={`${withLabel ? btnWhatsApp : iconBtnWhatsApp} ${className}`}
+        aria-label={`Send WhatsApp to ${memberName}`}
+        title={hasPhone ? "Send WhatsApp" : "No phone number"}
+        disabled={!hasPhone}
+        onClick={() => setOpen(true)}
+      >
+        <MessageCircle className="size-4" aria-hidden />
+        {withLabel && "WhatsApp"}
+      </button>
+      {open && (
+        <WhatsAppComposer
+          recipients={{ memberIds: [memberId], all: false, search: "", count: 1, name: memberName }}
+          onClose={() => setOpen(false)}
+        />
+      )}
+    </>
+  );
+}
 
 export function WhatsAppComposer({ recipients, onClose }: { recipients: Recipients; onClose: () => void }) {
   const [templates, setTemplates] = useState<WhatsAppTemplate[]>();
@@ -138,9 +178,17 @@ export function WhatsAppComposer({ recipients, onClose }: { recipients: Recipien
   return (
     <Modal title="Send WhatsApp message" onClose={onClose} wide>
       <p className="text-sm text-neutral-600">
-        To <strong className="text-neutral-900">{recipients.count}</strong>{" "}
-        {recipients.all ? (recipients.search ? `members matching “${recipients.search}”` : "members (everyone)") : recipients.count === 1 ? "selected member" : "selected members"}.
-        Members without a valid phone number are skipped.
+        {recipients.name ? (
+          <>
+            To <strong className="text-neutral-900">{recipients.name}</strong>.
+          </>
+        ) : (
+          <>
+            To <strong className="text-neutral-900">{recipients.count}</strong>{" "}
+            {recipients.all ? (recipients.search ? `members matching “${recipients.search}”` : "members (everyone)") : recipients.count === 1 ? "selected member" : "selected members"}.
+            Members without a valid phone number are skipped.
+          </>
+        )}
       </p>
 
       {loadError ? (

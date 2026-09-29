@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { InfoRow, type Info } from "@/components/info-row";
 import { DeleteMemberButton } from "@/components/member-actions";
 import { QrCard } from "@/components/qr-card";
+import { WhatsAppButton } from "@/components/whatsapp-composer";
 import { Avatar, btnPrimary, card } from "@/components/ui";
 import { displayUrl, formatDate, profileUrl, socialHref, socialLabel, websiteHref } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
@@ -46,7 +47,14 @@ export default async function MemberDetailPage({ params }: PageProps<"/admin/mem
             <p className="text-neutral-600">{member.companyName ?? "No company"}</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <WhatsAppButton
+            memberId={member.id}
+            memberName={member.memberName}
+            hasPhone={!!member.phone}
+            withLabel
+            className="flex-1 sm:flex-none"
+          />
           <Link href={`/admin/members/${member.id}/edit`} className={`${btnPrimary} flex-1 sm:flex-none`}>
             <Pencil className="size-4" aria-hidden /> Edit
           </Link>
@@ -76,7 +84,7 @@ export default async function MemberDetailPage({ params }: PageProps<"/admin/mem
 
         <section className={`${card} p-5 sm:p-6`}>
           <h2 className="mb-5 font-semibold">Public Profile &amp; QR Code</h2>
-          <QrCard url={profileUrl(member.publicToken)} memberName={member.memberName} openLabel="Open Public Profile" />
+          <QrCard url={profileUrl(member.publicToken)} memberName={member.memberName} openLabel="Open Public Profile" share />
         </section>
       </div>
     </div>

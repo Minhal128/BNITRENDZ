@@ -57,7 +57,7 @@ export function QrButton({ publicToken, memberName, withLabel = false }: { publi
       </button>
       {open && (
         <Modal title="Member QR Code" onClose={() => setOpen(false)}>
-          <QrCard url={profileUrl(publicToken)} memberName={memberName} openLabel="Open Profile" />
+          <QrCard url={profileUrl(publicToken)} memberName={memberName} openLabel="Open Profile" share />
         </Modal>
       )}
     </>

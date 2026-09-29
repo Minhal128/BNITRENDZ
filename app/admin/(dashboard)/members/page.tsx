@@ -4,6 +4,7 @@ import Link from "next/link";
 import { DeleteMemberButton, QrButton } from "@/components/member-actions";
 import { SelectMemberCheckbox, SelectPageCheckbox, SelectionBar, SelectionProvider } from "@/components/member-selection";
 import { MembersToolbar } from "@/components/members-toolbar";
+import { WhatsAppButton } from "@/components/whatsapp-composer";
 import { Avatar, btnPrimary, btnSecondary, card, iconBtn } from "@/components/ui";
 import { displayUrl, formatDate, websiteHref } from "@/lib/format";
 import { listMembers } from "@/lib/members";
@@ -11,7 +12,7 @@ import { listQuerySchema, type ListQuery } from "@/lib/validation";
 
 export const metadata: Metadata = { title: "Members" };
 
-type Row = { id: string; publicToken: string; memberName: string };
+type Row = { id: string; publicToken: string; memberName: string; phone: string | null };
 
 function RowActions({ member, labels = false }: { member: Row; labels?: boolean }) {
   const linkCls = labels ? btnSecondary : iconBtn;
@@ -25,6 +26,13 @@ function RowActions({ member, labels = false }: { member: Row; labels?: boolean 
         <Pencil className="size-4" aria-hidden />
         {labels && "Edit"}
       </Link>
+      <WhatsAppButton
+        memberId={member.id}
+        memberName={member.memberName}
+        hasPhone={!!member.phone}
+        withLabel={labels}
+        className={labels ? "order-first col-span-2" : ""}
+      />
       <QrButton publicToken={member.publicToken} memberName={member.memberName} withLabel={labels} />
       <DeleteMemberButton memberId={member.id} memberName={member.memberName} withLabel={labels} />
     </div>
@@ -104,13 +112,13 @@ export default async function MembersPage({ searchParams }: PageProps<"/admin/me
                   <th scope="col" className="w-12 py-3 pr-1 pl-4">
                     <SelectPageCheckbox />
                   </th>
-                  <th scope="col" className="w-[24%] px-3 py-3 min-[1400px]:w-[18%]">Member</th>
-                  <th scope="col" className="w-[16%] px-3 py-3 min-[1400px]:w-[11%]">Company</th>
+                  <th scope="col" className="w-[22%] px-3 py-3 min-[1400px]:w-[17%]">Member</th>
+                  <th scope="col" className="w-[15%] px-3 py-3 min-[1400px]:w-[10%]">Company</th>
                   <th scope="col" className="w-36 px-3 py-3">Phone</th>
-                  <th scope="col" className="w-[21%] px-3 py-3 min-[1400px]:w-[15%]">Email</th>
-                  <th scope="col" className="hidden w-[11%] px-3 py-3 min-[1400px]:table-cell">Website</th>
+                  <th scope="col" className="w-[18%] px-3 py-3 min-[1400px]:w-[14%]">Email</th>
+                  <th scope="col" className="hidden w-[9%] px-3 py-3 min-[1400px]:table-cell">Website</th>
                   <th scope="col" className="hidden w-28 px-3 py-3 min-[1400px]:table-cell">Created</th>
-                  <th scope="col" className="w-44 px-3 py-3 text-right">Actions</th>
+                  <th scope="col" className="w-56 px-3 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100">

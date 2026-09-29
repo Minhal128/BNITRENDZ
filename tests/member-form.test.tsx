@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import QRCode from "qrcode";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemberForm } from "@/components/member-form";
@@ -73,6 +73,35 @@ describe("registration form", () => {
     const download = await screen.findByRole("link", { name: /Download QR/ });
     expect(download.getAttribute("download")).toBe("member-jane-doe-qr.png");
     expect(download.getAttribute("href")).toMatch(/^data:image\/png;base64,/);
+  });
+});
+
+describe("QR sharing", () => {
+  afterEach(() => {
+    Reflect.deleteProperty(navigator, "share");
+    Reflect.deleteProperty(navigator, "canShare");
+  });
+
+  it("shares the QR image itself, with the profile link in the text", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json({ member: { publicToken: "abc123", memberName: "Jane Doe" } }, { status: 201 })),
+    );
+    const share = vi.fn<(data: ShareData) => Promise<void>>(async () => {});
+    Object.defineProperty(navigator, "share", { value: share, configurable: true });
+    Object.defineProperty(navigator, "canShare", { value: () => true, configurable: true });
+
+    render(<MemberForm mode="register" />);
+    fillName("Jane Doe");
+    fireEvent.click(submitButton());
+    await screen.findByRole("link", { name: /Download QR/ }); // QR image is ready
+    fireEvent.click(screen.getByRole("button", { name: /Share/ }));
+
+    await waitFor(() => expect(share).toHaveBeenCalledTimes(1));
+    const data = share.mock.calls[0]![0];
+    expect(data.files?.[0]).toMatchObject({ name: "member-jane-doe-qr.png", type: "image/png" });
+    expect(data.files![0]!.size).toBeGreaterThan(500);
+    expect(data.text).toContain("http://localhost:3000/member/abc123");
   });
 });
 

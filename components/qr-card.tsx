@@ -17,6 +17,12 @@ type Props = {
   openLabel?: string;
 };
 
+/** Built synchronously so navigator.share() still runs inside the click's user activation (Safari requires it). */
+function pngFile(dataUrl: string, name: string) {
+  const bytes = Uint8Array.from(atob(dataUrl.split(",")[1] ?? ""), (c) => c.charCodeAt(0));
+  return new File([bytes], name, { type: "image/png" });
+}
+
 export function QrCard({ url, memberName, label = "Public Profile URL", share = false, openLabel }: Props) {
   const [dataUrl, setDataUrl] = useState<string>();
 
@@ -30,10 +36,16 @@ export function QrCard({ url, memberName, label = "Public Profile URL", share = 
     };
   }, [url]);
 
-  async function shareLink() {
+  async function shareQr() {
     if (!("share" in navigator)) return copyLink(url);
+    const file = dataUrl ? pngFile(dataUrl, qrFileName(memberName)) : null;
+    // Share the QR image itself where the browser can (phones, Chrome/Edge); otherwise share the link.
+    const data: ShareData =
+      file && navigator.canShare?.({ files: [file] })
+        ? { files: [file], title: "Member Profile", text: `${memberName} · Member Profile\n${url}` }
+        : { title: "Member Profile", text: `${memberName} · Member Profile`, url };
     try {
-      await navigator.share({ title: "Member Profile", text: `${memberName} · Member Profile`, url });
+      await navigator.share(data);
     } catch (error) {
       if ((error as Error).name !== "AbortError") await copyLink(url);
     }
@@ -68,7 +80,7 @@ export function QrCard({ url, memberName, label = "Public Profile URL", share = 
       <div className="flex w-full flex-col gap-2">
         <CopyButton url={url} />
         {share && (
-          <button type="button" className={btnSecondary} onClick={shareLink}>
+          <button type="button" className={btnSecondary} onClick={shareQr}>
             <Share2 className="size-4" aria-hidden /> Share
           </button>
         )}
