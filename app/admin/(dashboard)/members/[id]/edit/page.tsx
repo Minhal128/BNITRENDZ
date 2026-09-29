@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MemberForm } from "@/components/member-form";
 import { card } from "@/components/ui";
-import { toDateInput } from "@/lib/format";
+import { photoUrl, toDateInput } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Edit Member" };
@@ -42,6 +42,7 @@ export default async function EditMemberPage({ params }: PageProps<"/admin/membe
             email: member.email ?? "",
             facebook: member.facebook ?? "",
             youtube: member.youtube ?? "",
+            photo: photoUrl(member) ?? "",
           }}
         />
       </div>

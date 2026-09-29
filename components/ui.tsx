@@ -13,7 +13,14 @@ export const inputCls =
   "block w-full rounded-xl border border-neutral-300 bg-white px-3.5 py-2.5 text-[15px] text-neutral-900 shadow-sm transition placeholder:text-neutral-400 focus:border-red-500 focus:outline-none focus:ring-4 focus:ring-red-500/15 aria-[invalid=true]:border-red-600 aria-[invalid=true]:bg-red-50/40";
 export const card = "rounded-2xl border border-neutral-200 bg-white shadow-sm";
 
-export function Avatar({ name, className = "size-10 text-sm" }: { name: string; className?: string }) {
+type AvatarProps = { name: string; src?: string | null; className?: string };
+
+/** The member's photo when there is one, otherwise their initials. Decorative: the name is always shown beside it. */
+export function Avatar({ name, src, className = "size-10 text-sm" }: AvatarProps) {
+  if (src) {
+    // Photos are already 512px JPEGs, so the optimizer (and its localPatterns rule for "?v=") isn't needed.
+    return <Image src={src} alt="" width={160} height={160} unoptimized className={`shrink-0 rounded-full object-cover ${className}`} />;
+  }
   return (
     <span aria-hidden className={`grid shrink-0 place-items-center rounded-full bg-red-100 font-bold text-red-700 ${className}`}>
       {initials(name)}

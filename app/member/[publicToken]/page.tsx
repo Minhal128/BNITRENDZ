@@ -1,10 +1,10 @@
-import { BriefcaseBusiness, Building2, Cake, Camera, CirclePlay, Globe, Heart, Mail, MapPin, Phone, Users } from "lucide-react";
+import { BriefcaseBusiness, Building2, Camera, CirclePlay, Globe, Mail, MapPin, Phone, Users } from "lucide-react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { InfoRow, type Info } from "@/components/info-row";
 import { PublicShell } from "@/components/public-shell";
 import { Avatar, card } from "@/components/ui";
-import { displayUrl, formatDate, socialHref, socialLabel, websiteHref } from "@/lib/format";
+import { displayUrl, photoUrl, socialHref, socialLabel, websiteHref } from "@/lib/format";
 import { getPublicMember } from "@/lib/members";
 
 type Props = PageProps<"/member/[publicToken]">;
@@ -24,8 +24,6 @@ export default async function MemberProfilePage({ params }: Props) {
   const details: Info[] = [
     { icon: Phone, label: "Phone", value: member.phone, href: member.phone ? `tel:${member.phone.replace(/[^\d+]/g, "")}` : undefined },
     { icon: MapPin, label: "Address", value: member.address },
-    { icon: Cake, label: "Birthday", value: member.birthday && formatDate(member.birthday) },
-    { icon: Heart, label: "Anniversary", value: member.anniversary && formatDate(member.anniversary) },
   ];
   const online: Info[] = [
     { icon: Globe, label: "Website", value: member.website && displayUrl(member.website), href: member.website ? websiteHref(member.website) : undefined },
@@ -43,7 +41,7 @@ export default async function MemberProfilePage({ params }: Props) {
     <PublicShell>
       <article className={`${card} overflow-hidden`}>
         <div className="flex flex-col items-center px-6 pt-8 pb-6 text-center">
-          <Avatar name={member.memberName} className="size-20 text-2xl ring-4 ring-red-50" />
+          <Avatar name={member.memberName} src={photoUrl(member)} className="size-24 text-3xl ring-4 ring-red-50" />
           <p className="mt-4 text-xs font-bold tracking-widest text-red-600 uppercase">Member Profile</p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight break-words sm:text-3xl">{member.memberName}</h1>
           {member.companyName && (

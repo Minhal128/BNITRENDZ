@@ -7,7 +7,7 @@ import { DeleteMemberButton } from "@/components/member-actions";
 import { QrCard } from "@/components/qr-card";
 import { WhatsAppButton } from "@/components/whatsapp-composer";
 import { Avatar, btnPrimary, card } from "@/components/ui";
-import { displayUrl, formatDate, profileUrl, socialHref, socialLabel, websiteHref } from "@/lib/format";
+import { displayUrl, formatDate, photoUrl, profileUrl, socialHref, socialLabel, websiteHref } from "@/lib/format";
 import { prisma } from "@/lib/prisma";
 
 export const metadata: Metadata = { title: "Member Details" };
@@ -42,7 +42,7 @@ export default async function MemberDetailPage({ params }: PageProps<"/admin/mem
 
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex min-w-0 items-center gap-4">
-          <Avatar name={member.memberName} className="size-14 text-lg" />
+          <Avatar name={member.memberName} src={photoUrl(member)} className="size-20 text-2xl" />
           <div className="min-w-0">
             <h1 className="text-2xl font-bold tracking-tight break-words">{member.memberName}</h1>
             <p className="text-neutral-600">{member.companyName ?? "No company"}</p>

@@ -7,7 +7,7 @@ import type { ListQuery } from "./validation";
 /** 128 random bits, URL-safe: unique and not guessable. */
 export const newPublicToken = () => randomBytes(16).toString("base64url");
 
-/** Everything a public profile may show: never the internal id or timestamps. */
+/** Everything a public profile may show: never the internal id or record timestamps, and special dates stay admin-only. */
 export const publicMemberSelect = {
   publicToken: true,
   memberName: true,
@@ -15,14 +15,20 @@ export const publicMemberSelect = {
   businessCategory: true,
   phone: true,
   address: true,
-  birthday: true,
-  anniversary: true,
   website: true,
   instagram: true,
   email: true,
   facebook: true,
   youtube: true,
+  photoUpdatedAt: true,
 } satisfies Prisma.MemberSelect;
+
+/** The form's photo (a validated JPEG data URL) as columns: undefined keeps the current photo, null removes it. */
+export function photoColumns(photo: string | null | undefined) {
+  if (photo === undefined) return {};
+  if (!photo) return { photo: null, photoUpdatedAt: null };
+  return { photo: Buffer.from(photo.slice(photo.indexOf(",") + 1), "base64"), photoUpdatedAt: new Date() };
+}
 
 // cache() lets generateMetadata and the page share one query per request.
 export const getPublicMember = cache((publicToken: string) =>

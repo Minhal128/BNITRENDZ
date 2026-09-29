@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { denyUnlessAdmin, getAdmin } from "@/lib/auth";
-import { listMembers, newPublicToken, publicMemberSelect } from "@/lib/members";
+import { listMembers, newPublicToken, photoColumns, publicMemberSelect } from "@/lib/members";
 import { prisma } from "@/lib/prisma";
 import { clientIp, rateLimit } from "@/lib/security";
 import { invalidResponse, listQuerySchema, memberSchema } from "@/lib/validation";
@@ -28,7 +28,8 @@ export async function POST(req: Request) {
   const parsed = memberSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return invalidResponse(parsed.error);
 
-  const data = { ...parsed.data, publicToken: newPublicToken() };
+  const { photo, ...fields } = parsed.data;
+  const data = { ...fields, ...photoColumns(photo), publicToken: newPublicToken() };
   const member = admin
     ? await prisma.member.create({ data })
     : await prisma.member.create({ data, select: publicMemberSelect });

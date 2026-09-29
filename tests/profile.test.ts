@@ -1,9 +1,10 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import { GET as getPhoto } from "@/app/api/members/public/[publicToken]/photo/route";
 import { GET } from "@/app/api/members/public/[publicToken]/route";
 import ProfilePage from "@/app/member/[publicToken]/page";
 import { prisma } from "@/lib/prisma";
-import { params, request } from "./helpers";
+import { JPEG, params, request } from "./helpers";
 
 const fetchProfile = (publicToken: string) => GET(request(`/api/members/public/${publicToken}`), params({ publicToken }));
 const renderProfile = async (publicToken: string) =>
@@ -31,6 +32,32 @@ describe("public member profile", () => {
     expect(html).toContain('rel="noopener noreferrer"');
     expect(html).not.toContain("Birthday");
     expect(html).not.toContain("Website");
+  });
+
+  it("shows the photo but keeps special dates off the public profile and API", async () => {
+    await prisma.member.create({
+      data: {
+        memberName: "Jane Doe",
+        birthday: new Date("1990-05-10"),
+        anniversary: new Date("2015-06-20"),
+        photo: JPEG,
+        photoUpdatedAt: new Date(1000),
+        publicToken: "dates-token",
+      },
+    });
+    const { member } = await (await fetchProfile("dates-token")).json();
+    expect(member).not.toHaveProperty("birthday");
+    expect(member).not.toHaveProperty("anniversary");
+    const html = await renderProfile("dates-token");
+    expect(html).not.toMatch(/Birthday|Anniversary|1990|2015/);
+    expect(html).toContain('src="/api/members/public/dates-token/photo?v=1000"');
+  });
+
+  it("answers 404 for the photo of a member without one, or of an unknown token", async () => {
+    await prisma.member.create({ data: { memberName: "No Photo", publicToken: "no-photo" } });
+    for (const publicToken of ["no-photo", "no-such-token"]) {
+      expect((await getPhoto(request(`/api/members/public/${publicToken}/photo`), params({ publicToken }))).status).toBe(404);
+    }
   });
 
   it("answers 404 / Member Not Found for an invalid token", async () => {

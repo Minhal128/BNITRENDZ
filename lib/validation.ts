@@ -63,6 +63,13 @@ const social = text(200).transform((v, ctx) => {
   return url;
 });
 
+// The form turns every camera shot or upload into a JPEG data URL (FF D8 FF is "/9j/" in base64); ~700k chars ≈ 512 KB.
+const photo = z
+  .string()
+  .max(700_000, "Photo must be 512 KB or smaller.")
+  .refine((v) => !v || /^data:image\/jpeg;base64,\/9j\/[A-Za-z0-9+/]*={0,2}$/.test(v), "Please choose a valid photo.")
+  .transform((v) => v || null);
+
 export const memberSchema = z.object({
   memberName: text(100).min(1, "Member name is required."),
   companyName: optionalText(120).nullish(),
@@ -76,6 +83,7 @@ export const memberSchema = z.object({
   email: email.nullish(),
   facebook: social.nullish(),
   youtube: social.nullish(),
+  photo: photo.nullish(),
 });
 
 export const memberUpdateSchema = memberSchema.partial();

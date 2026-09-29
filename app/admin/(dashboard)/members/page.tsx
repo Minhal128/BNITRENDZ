@@ -6,7 +6,7 @@ import { SelectMemberCheckbox, SelectPageCheckbox, SelectionBar, SelectionProvid
 import { MembersToolbar } from "@/components/members-toolbar";
 import { WhatsAppButton } from "@/components/whatsapp-composer";
 import { Avatar, btnPrimary, btnSecondary, card, iconBtn } from "@/components/ui";
-import { displayUrl, formatDate, websiteHref } from "@/lib/format";
+import { displayUrl, formatDate, photoUrl, websiteHref } from "@/lib/format";
 import { listMembers } from "@/lib/members";
 import { listQuerySchema, type ListQuery } from "@/lib/validation";
 
@@ -132,7 +132,7 @@ export default async function MembersPage({ searchParams }: PageProps<"/admin/me
                         href={`/admin/members/${member.id}`}
                         className="flex items-center gap-3 rounded-lg font-semibold hover:text-red-700 focus-visible:ring-4 focus-visible:ring-red-500/25 focus-visible:outline-none"
                       >
-                        <Avatar name={member.memberName} />
+                        <Avatar name={member.memberName} src={photoUrl(member)} />
                         <span className="min-w-0">
                           <span className="block truncate">{member.memberName}</span>
                           {member.businessCategory && (
@@ -175,7 +175,7 @@ export default async function MembersPage({ searchParams }: PageProps<"/admin/me
               <li key={member.id} className={`${card} p-4`}>
                 <div className="flex items-center gap-3">
                   <SelectMemberCheckbox id={member.id} name={member.memberName} />
-                  <Avatar name={member.memberName} />
+                  <Avatar name={member.memberName} src={photoUrl(member)} />
                   <div className="min-w-0">
                     <Link href={`/admin/members/${member.id}`} className="block truncate font-semibold hover:text-red-700">
                       {member.memberName}

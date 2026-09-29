@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { MemberForm } from "@/components/member-form";
 import { qrFileName } from "@/lib/format";
+import { memberSchema, type MemberFormValues } from "@/lib/validation";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }) }));
 
@@ -73,6 +74,34 @@ describe("registration form", () => {
     const download = await screen.findByRole("link", { name: /Download QR/ });
     expect(download.getAttribute("download")).toBe("member-jane-doe-qr.png");
     expect(download.getAttribute("href")).toMatch(/^data:image\/png;base64,/);
+  });
+});
+
+describe("photo field (edit mode)", () => {
+  const initialValues = {
+    ...Object.fromEntries(Object.keys(memberSchema.shape).map((key) => [key, ""])),
+    memberName: "Jane Doe",
+    photo: "/api/members/public/t/photo?v=1",
+  } as MemberFormValues;
+  const sentBody = async (fetchMock: ReturnType<typeof vi.fn>) => {
+    fireEvent.click(screen.getByRole("button", { name: "Save Changes" }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    return JSON.parse((fetchMock.mock.calls[0]![1] as RequestInit).body as string);
+  };
+
+  it("leaves an unchanged photo out of the update, so the server keeps it", async () => {
+    const fetchMock = vi.fn(async () => Response.json({ member: { id: "m1" } }));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<MemberForm mode="edit" memberId="m1" initialValues={initialValues} />);
+    expect(await sentBody(fetchMock)).not.toHaveProperty("photo");
+  });
+
+  it('sends "" when the photo is removed', async () => {
+    const fetchMock = vi.fn(async () => Response.json({ member: { id: "m1" } }));
+    vi.stubGlobal("fetch", fetchMock);
+    render(<MemberForm mode="edit" memberId="m1" initialValues={initialValues} />);
+    fireEvent.click(screen.getByRole("button", { name: /Remove/ }));
+    expect((await sentBody(fetchMock)).photo).toBe("");
   });
 });
 

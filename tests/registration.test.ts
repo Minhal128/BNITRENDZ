@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { GET } from "@/app/api/members/public/[publicToken]/photo/route";
 import { POST } from "@/app/api/members/route";
 import { prisma } from "@/lib/prisma";
-import { request, validMember } from "./helpers";
+import { JPEG, jpegDataUrl, params, request, validMember } from "./helpers";
 
 const register = (body: unknown, headers?: Record<string, string>) =>
   POST(request("/api/members", { method: "POST", body, headers }));
@@ -15,10 +16,30 @@ describe("public registration (POST /api/members)", () => {
       memberName: "Jane Doe",
       website: "https://acme.example.com/",
       instagram: "jane.doe",
-      birthday: "1990-05-10T00:00:00.000Z",
     });
     expect(member).not.toHaveProperty("id");
     expect(member).not.toHaveProperty("createdAt");
+    expect(member).not.toHaveProperty("birthday"); // special dates are admin-only
+    expect(member).not.toHaveProperty("anniversary");
+  });
+
+  it("stores a photo from the camera or an upload and serves it at the public photo URL", async () => {
+    const { member } = await (await register({ ...validMember, photo: jpegDataUrl() })).json();
+    expect(member).not.toHaveProperty("photo"); // bytes never travel inside member JSON
+    const res = await GET(request(`/api/members/public/${member.publicToken}/photo`), params({ publicToken: member.publicToken }));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toBe("image/jpeg");
+    expect(Buffer.from(await res.arrayBuffer())).toEqual(JPEG);
+  });
+
+  it("rejects photos that aren't JPEG data URLs or are too large", async () => {
+    const tooBig = `data:image/jpeg;base64,/9j/${"A".repeat(700_000)}`;
+    for (const photo of ["data:image/png;base64,iVBORw0KGgo=", "data:text/html;base64,PHNjcmlwdD4=", "javascript:alert(1)", tooBig]) {
+      const res = await register({ memberName: "Jane Doe", photo });
+      expect(res.status).toBe(400);
+      expect((await res.json()).fieldErrors.photo).toBeDefined();
+    }
+    expect(await prisma.member.count()).toBe(0);
   });
 
   it("saves every member field to the database", async () => {

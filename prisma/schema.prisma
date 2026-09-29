@@ -31,6 +31,10 @@ model Member {
   email            String?
   facebook         String?
   youtube          String?
+  // JPEG bytes, omitted from every query unless selected (lib/prisma.ts); served by the public photo route.
+  photo            Bytes?
+  // null = no photo. Also versions the photo URL so browsers can cache it forever.
+  photoUpdatedAt   DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 

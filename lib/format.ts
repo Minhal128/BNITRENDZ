@@ -7,6 +7,10 @@ export const APP_URL = (
 /** The only thing a member QR code ever contains. */
 export const profileUrl = (publicToken: string) => `${APP_URL}/member/${publicToken}`;
 
+/** A new photo gets a new URL (?v=), so the photo route can let browsers cache it forever. */
+export const photoUrl = (member: { publicToken: string; photoUpdatedAt: Date | null }) =>
+  member.photoUpdatedAt ? `/api/members/public/${member.publicToken}/photo?v=${member.photoUpdatedAt.getTime()}` : null;
+
 export function qrFileName(memberName: string) {
   const slug = memberName
     .normalize("NFKD")

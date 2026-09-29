@@ -60,7 +60,7 @@ async function main() {
   if (process.env.NODE_ENV === "production") return console.log("Production: sample members skipped.");
   if (await prisma.member.count()) return console.log("Members already exist: sample members skipped.");
   await prisma.member.createMany({
-    data: SAMPLE_MEMBERS.map((member) => ({ ...memberSchema.parse(member), publicToken: newPublicToken() })),
+    data: SAMPLE_MEMBERS.map((member) => ({ ...memberSchema.omit({ photo: true }).parse(member), publicToken: newPublicToken() })),
   });
   console.log(`Created ${SAMPLE_MEMBERS.length} sample members.`);
 }

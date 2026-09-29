@@ -1,5 +1,5 @@
 import { denyUnlessAdmin } from "@/lib/auth";
-import { nullIfMissing } from "@/lib/members";
+import { nullIfMissing, photoColumns } from "@/lib/members";
 import { prisma } from "@/lib/prisma";
 import { invalidResponse, memberUpdateSchema } from "@/lib/validation";
 
@@ -18,8 +18,9 @@ export async function PATCH(req: Request, ctx: RouteContext<"/api/members/[id]">
   if (denied) return denied;
   const parsed = memberUpdateSchema.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return invalidResponse(parsed.error);
+  const { photo, ...fields } = parsed.data;
   const member = await prisma.member
-    .update({ where: { id: (await ctx.params).id }, data: parsed.data })
+    .update({ where: { id: (await ctx.params).id }, data: { ...fields, ...photoColumns(photo) } })
     .catch(nullIfMissing);
   return member ? Response.json({ member }) : notFound();
 }

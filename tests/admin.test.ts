@@ -1,6 +1,7 @@
 import { encode } from "next-auth/jwt";
 import { NextRequest, type NextFetchEvent } from "next/server";
 import { describe, expect, it } from "vitest";
+import { GET as getPhoto } from "@/app/api/members/public/[publicToken]/photo/route";
 import { GET as publicProfile } from "@/app/api/members/public/[publicToken]/route";
 import { DELETE, GET as getMember, PATCH } from "@/app/api/members/[id]/route";
 import { GET as listMembers, POST } from "@/app/api/members/route";
@@ -9,7 +10,7 @@ import { getMemberStats } from "@/lib/members";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/security";
 import proxy from "@/proxy";
-import { ADMIN, createAdmin, params, request, signInAdmin, validMember } from "./helpers";
+import { ADMIN, createAdmin, JPEG, jpegDataUrl, params, request, signInAdmin, validMember } from "./helpers";
 
 const runProxy = (req: NextRequest) =>
   (proxy as unknown as (req: NextRequest, event: NextFetchEvent) => Promise<Response | undefined>)(req, {} as NextFetchEvent);
@@ -112,6 +113,32 @@ describe("admin member CRUD", () => {
       publicToken: "stable-token",
     });
     expect((await publicProfile(request("/api/members/public/stable-token"), params({ publicToken: "stable-token" }))).status).toBe(200);
+  });
+
+  it("keeps the photo unless an update replaces or removes it", async () => {
+    await signInAdmin();
+    const member = await prisma.member.create({
+      data: { memberName: "Pic", publicToken: "pic-token", photo: JPEG, photoUpdatedAt: new Date(1000) },
+    });
+    const patch = async (body: object) =>
+      (await PATCH(request(`/api/members/${member.id}`, { method: "PATCH", body }), params({ id: member.id }))).json();
+    const stored = async () => {
+      const row = await prisma.member.findUniqueOrThrow({ where: { id: member.id }, select: { photo: true, photoUpdatedAt: true } });
+      return { photo: row.photo && Buffer.from(row.photo), photoUpdatedAt: row.photoUpdatedAt };
+    };
+
+    expect((await patch({ memberName: "Pic 2" })).member).not.toHaveProperty("photo"); // bytes never travel inside member JSON
+    expect(await stored()).toEqual({ photo: JPEG, photoUpdatedAt: new Date(1000) });
+
+    const other = Buffer.from([0xff, 0xd8, 0xff, 0xdb, 0x00, 0x43]);
+    await patch({ photo: jpegDataUrl(other) });
+    const replaced = await stored();
+    expect(replaced.photo).toEqual(other);
+    expect(replaced.photoUpdatedAt!.getTime()).toBeGreaterThan(1000); // new version, new URL
+
+    await patch({ photo: "" });
+    expect(await stored()).toEqual({ photo: null, photoUpdatedAt: null });
+    expect((await getPhoto(request("/api/members/public/pic-token/photo"), params({ publicToken: "pic-token" }))).status).toBe(404);
   });
 
   it("rejects invalid updates and unknown members", async () => {

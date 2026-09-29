@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CopyButton } from "@/components/copy-button";
 import { Avatar, btnSecondary, card } from "@/components/ui";
-import { APP_URL, formatDate } from "@/lib/format";
+import { APP_URL, formatDate, photoUrl } from "@/lib/format";
 import { getMemberStats } from "@/lib/members";
 import { prisma } from "@/lib/prisma";
 
@@ -15,7 +15,7 @@ export default async function DashboardPage() {
     prisma.member.findMany({
       orderBy: { createdAt: "desc" },
       take: 5,
-      select: { id: true, memberName: true, companyName: true, createdAt: true },
+      select: { id: true, publicToken: true, memberName: true, companyName: true, photoUpdatedAt: true, createdAt: true },
     }),
   ]);
   const timeZone = process.env.APP_TIMEZONE || "UTC";
@@ -70,7 +70,7 @@ export default async function DashboardPage() {
                     href={`/admin/members/${member.id}`}
                     className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-red-50/50 focus-visible:bg-red-50 focus-visible:outline-none"
                   >
-                    <Avatar name={member.memberName} />
+                    <Avatar name={member.memberName} src={photoUrl(member)} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-medium">{member.memberName}</span>
                       <span className="block truncate text-sm text-neutral-500">{member.companyName ?? "No company"}</span>

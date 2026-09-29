@@ -35,6 +35,10 @@ export async function signInAdmin() {
   return admin;
 }
 
+/** Starts like a JPEG (FF D8 FF), which is all the server checks; the browser re-encodes real photos. */
+export const JPEG = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0xff, 0xd9]);
+export const jpegDataUrl = (bytes: Buffer = JPEG) => `data:image/jpeg;base64,${bytes.toString("base64")}`;
+
 export const validMember = {
   memberName: "Jane Doe",
   companyName: "Acme Ltd",

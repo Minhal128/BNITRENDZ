@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { profileUrl } from "@/lib/format";
 import { memberSchema, type MemberFormValues } from "@/lib/validation";
+import { PhotoField } from "./photo-field";
 import { QrCard } from "./qr-card";
 import { btnPrimary, btnSecondary, inputCls } from "./ui";
 
@@ -44,7 +45,10 @@ const SECTIONS: { title: string; fields: Field[] }[] = [
   },
 ];
 
-const EMPTY = Object.fromEntries(SECTIONS.flatMap((s) => s.fields).map((f) => [f.name, ""])) as MemberFormValues;
+const EMPTY = {
+  ...Object.fromEntries(SECTIONS.flatMap((s) => s.fields).map((f) => [f.name, ""])),
+  photo: "",
+} as MemberFormValues;
 
 type Props =
   | { mode: "register" | "create"; memberId?: never; initialValues?: never }
@@ -66,7 +70,9 @@ export function MemberForm({ mode, memberId, initialValues }: Props) {
     event.preventDefault();
     if (inFlight.current) return; // blocks a double click even before the disabled state renders
 
-    const parsed = memberSchema.safeParse(values);
+    // An unchanged photo is its URL: leave it out and the server keeps it. "" removes it; a data URL replaces it.
+    const body = { ...values, photo: values.photo.startsWith("/") ? undefined : values.photo };
+    const parsed = memberSchema.safeParse(body);
     if (!parsed.success) {
       const fieldErrors = firstErrors(z.flattenError(parsed.error).fieldErrors);
       setErrors(fieldErrors);
@@ -85,7 +91,7 @@ export function MemberForm({ mode, memberId, initialValues }: Props) {
       const res = await fetch(mode === "edit" ? `/api/members/${memberId}` : "/api/members", {
         method: mode === "edit" ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify(body),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -125,6 +131,15 @@ export function MemberForm({ mode, memberId, initialValues }: Props) {
 
   return (
     <form noValidate onSubmit={onSubmit} className="space-y-8">
+      <PhotoField
+        name={values.memberName}
+        value={values.photo}
+        error={errors.photo}
+        onChange={(photo) => {
+          setValues((v) => ({ ...v, photo }));
+          setErrors((prev) => ({ ...prev, photo: undefined }));
+        }}
+      />
       {SECTIONS.map((section) => (
         <fieldset key={section.title}>
           <legend className="mb-4 text-xs font-bold tracking-widest text-red-600 uppercase">{section.title}</legend>

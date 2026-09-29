@@ -2,8 +2,8 @@
 
 A web app for managing a member network:
 
-- **Public registration** at `/member/register`. Anyone can sign up with their name, company, business category, contact details, special dates and social links. The member instantly gets a personal profile link and a QR code they can copy, share or download.
-- **Public profiles** at `/member/[publicToken]`. Only the fields a member filled in are shown, with tap-to-call, email and social links.
+- **Public registration** at `/member/register`. Anyone can sign up with a profile photo (taken with the camera or uploaded), their name, company, business category, contact details, special dates and social links. The member instantly gets a personal profile link and a QR code they can copy, share or download.
+- **Public profiles** at `/member/[publicToken]`. Only the fields a member filled in are shown, with their photo, tap-to-call, email and social links. Special dates (birthday, anniversary) are never shown publicly; only admins see them.
 - **Admin CRM** at `/admin`. Signed-in admins get dashboard stats and full member CRUD, with database-backed search, sorting, pagination and QR codes.
 
 ## Tech stack
@@ -132,9 +132,9 @@ npm test            # Vitest: migrates TEST_DATABASE_URL, then runs every suite
 
 The tests cover:
 
-- **Public registration**: valid submissions, invalid email/URL/dates, missing name, double submission, database writes, token generation and rate limiting.
-- **Public profiles**: valid, invalid and deleted tokens.
-- **Admin**: login and lockout, unauthorised access through the proxy, create/read/update/delete, search, pagination and dashboard stats.
+- **Public registration**: valid submissions, invalid email/URL/dates, missing name, double submission, database writes, token generation, photos (stored, served, non-JPEG and oversized rejected) and rate limiting.
+- **Public profiles**: valid, invalid and deleted tokens, and special dates kept off the public page and API.
+- **Admin**: login and lockout, unauthorised access through the proxy, create/read/update/delete (including keeping, replacing and removing photos), search, pagination and dashboard stats.
 - **Security**: unauthenticated and unauthorised API calls, CSRF origin checks, dangerous URLs and XSS payloads.
 
 ## Build
@@ -177,7 +177,8 @@ npm start
 | `POST /api/members`                     | public       | Register (rate limited); admins skip the limit            |
 | `GET /api/members`                      | admin        | List with `page`, `limit` (default 20, max 100), `search`, `sort` (`newest`, `oldest`, `name_asc`, `name_desc`) |
 | `GET/PATCH/DELETE /api/members/:id`     | admin        | Read, update and delete one member                        |
-| `GET /api/members/public/:publicToken`  | public       | Public profile fields only                                |
+| `GET /api/members/public/:publicToken`  | public       | Public profile fields only (no special dates)             |
+| `GET /api/members/public/:publicToken/photo` | public  | The member's photo (JPEG), or 404                         |
 | `GET /api/whatsapp/templates`           | admin        | Approved WhatsApp templates that can be sent              |
 | `POST /api/whatsapp/send`               | admin        | Send a template or text to `memberIds`, or to `all` members matching `search` |
 
@@ -188,7 +189,8 @@ npm start
 - **Brute force and spam**: logins are limited to 10 per IP per 15 minutes; public registrations to 30 per IP per 10 minutes. The counters live in Postgres, so they hold across serverless instances, and IPs are stored only as SHA-256 hashes.
 - **Validation**: the same Zod schema runs in the browser and on the server. Text is trimmed and length-capped, and dates must be real and not in the future. Links must be `http(s)`, so `javascript:`, `data:` and `vbscript:` are rejected.
 - **XSS**: user content is only rendered as React text, never as raw HTML. External links use `target="_blank" rel="noopener noreferrer"`.
-- **Privacy**: profiles are addressed by a random 128-bit token, never the database id. Profile pages are marked `noindex`. QR codes contain only the profile URL.
+- **Privacy**: profiles are addressed by a random 128-bit token, never the database id. Profile pages are marked `noindex`. QR codes contain only the profile URL. Birthday and anniversary stay out of the public page and API.
+- **Photos**: the browser crops every camera shot or upload to a square JPEG of at most 512 px, which also strips metadata such as GPS location. The server accepts only JPEG data up to 512 KB and stores it in Postgres. It serves photos as `image/jpeg` with `nosniff`, cached only by the browser, so a removed photo is gone for everyone else. On phones, **Take Photo** opens the camera app. On computers it uses the webcam, which needs HTTPS or localhost.
 - **Headers**: `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff` and a strict `Referrer-Policy`.
 - **Errors**: users only see friendly messages. Stack traces and database errors stay in the server logs.
 
