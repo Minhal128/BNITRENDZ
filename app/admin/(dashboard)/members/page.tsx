@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Eye, Pencil, Plus, SearchX, UserPlus } from "lucide-react";
+import { CakeSlice, ChevronLeft, ChevronRight, Eye, Pencil, Plus, SearchX, Sheet, UserPlus } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { DeleteMemberButton, QrButton } from "@/components/member-actions";
@@ -49,6 +49,13 @@ function pageHref(query: ListQuery, page: number) {
   return qs ? `/admin/members?${qs}` : "/admin/members";
 }
 
+/** Exports follow the current search, not the current page: the whole filtered list lands in the sheet. */
+function exportHref(search: string, sheet: "contacts" | "dates") {
+  const params = new URLSearchParams({ sheet });
+  if (search) params.set("search", search);
+  return `/api/members/export?${params}`;
+}
+
 export default async function MembersPage({ searchParams }: PageProps<"/admin/members">) {
   const query = listQuerySchema.parse(await searchParams);
   const { members, total, page, limit, totalPages } = await listMembers(query);
@@ -64,9 +71,17 @@ export default async function MembersPage({ searchParams }: PageProps<"/admin/me
           <h1 className="text-2xl font-bold tracking-tight">Members</h1>
           <p className="mt-1 text-sm text-neutral-600">Search, update and share member profiles.</p>
         </div>
-        <Link href="/admin/members/new" className={btnPrimary}>
-          <Plus className="size-4" aria-hidden /> Add Member
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <a href={exportHref(query.search, "contacts")} className={btnSecondary} download>
+            <Sheet className="size-4" aria-hidden /> Export contacts
+          </a>
+          <a href={exportHref(query.search, "dates")} className={btnSecondary} download>
+            <CakeSlice className="size-4" aria-hidden /> Export dates
+          </a>
+          <Link href="/admin/members/new" className={btnPrimary}>
+            <Plus className="size-4" aria-hidden /> Add Member
+          </Link>
+        </div>
       </header>
 
       <MembersToolbar search={query.search} sort={query.sort} limit={query.limit} />
